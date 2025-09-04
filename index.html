@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <!-- ฟอนต์ Prompt และ Noto Kufi Arabic -->
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      font-family: 'Prompt', sans-serif;
+      text-align: center;
+      background-color: #f4f4f4;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    body.dark {
+      background-color: #1c1c1c;
+      color: #eee;
+    }
+
+    h1 {
+      background-color: #007bff;
+      color: white;
+      padding: 20px 0;
+      margin: 0;
+      font-size: 2.0em;
+    }
+
+    h2 {
+      margin: 10px 0 15px;
+      font-size: 1.1em;
+    }
+
+    .arabic {
+      font-family: 'Noto Kufi Arabic', sans-serif;
+    }
+
+    .controls {
+      margin: 10px 0 20px;
+    }
+
+    select, button {
+      padding: 8px 12px;
+      font-size: 1em;
+      margin: 5px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+    }
+
+    .prayer-time {
+      background-color: white;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 15px;
+      margin: 10px auto;
+      width: 95%;
+      max-width: 400px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 1.1em;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .prayer-time:hover {
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .prayer-time.active {
+      background-color: #d4edda !important;
+      border-color: #28a745 !important;
+      color: #155724 !important;
+    }
+
+    body.dark .prayer-time {
+      background-color: #333;
+      border-color: #555;
+      color: #eee;
+    }
+
+    h5 {
+      margin: 10px;
+      font-weight: normal;
+      color: #555;
+    }
+
+    body.dark h5 {
+      color: #ccc;
+    }
+  </style>
+</head>
+
+<body>
+  <h1 class="arabic">أوقات الصلاة</h1>
+
+  <? var today = new Date(); ?>
+<h2 style="display: flex; justify-content: center; gap: 10px; align-items: center; flex-wrap: wrap;">
+  <span>📆 <?= Utilities.formatDate(today, Session.getScriptTimeZone(), 'dd MMMM yyyy') ?></span>
+  <span id="clock">⏰: --:--:--</span>
+</h2>
+
+  <div class="controls">
+    <label for="region">เลือกจังหวัด:</label>
+    <select id="region" onchange="adjustTimeNote()">
+      <option value="ยะลา" selected>ยะลา</option>
+      <option value="นครศรีธรรมราช">นครศรีธรรมราช / พัทลุง</option>
+      <option value="จะนะ">จะนะ / เทพา</option>
+      <option value="สตูล">สตูล</option>
+      <option value="ตรัง">ตรัง</option>
+      <option value="ปัตตานี">ปัตตานี</option>
+      <option value="นราธิวาส">นราธิวาส</option>
+      <option value="สุไหงโกลก">สุไหงโกลก</option>
+    </select>
+    <button onclick="toggleDarkMode()">🌙 Toggle</button>
+  </div>
+
+  <? var times = getPrayerTimes(today); ?>
+  <? if (times) { ?>
+    <div class="prayer-time" id="subuh">
+    <span class="arabic">فجر</span>
+    <i class="fas fa-moon"></i>
+    <span class="time"><?= times.subuh ?></span>
+    </div>
+<div class="prayer-time" id="syuruk">
+  <span class="arabic">شروق</span>
+  <i class="fas fa-cloud-sun"></i>
+  <span class="time"><?= times.syuruk ?></span>
+</div>
+<div class="prayer-time" id="zuhur">
+  <span class="arabic">ظهر</span>
+  <i class="fas fa-sun"></i>
+  <span class="time"><?= times.zuhur ?></span>
+</div>
+<div class="prayer-time" id="asar">
+  <span class="arabic">عصر</span>
+  <i class="fas fa-cloud"></i>
+  <span class="time"><?= times.asar ?></span>
+</div>
+<div class="prayer-time" id="maghrib">
+  <span class="arabic">مغرب</span>
+  <i class="fas fa-cloud-sun"></i>
+  <span class="time"><?= times.maghrib ?></span>
+</div>
+<div class="prayer-time" id="isya">
+  <span class="arabic">عشاء</span>
+  <i class="fas fa-moon"></i>
+  <span class="time"><?= times.isya ?></span>
+</div>
+
+  <? } else { ?>
+    <p>ไม่พบข้อมูลเวลาละหมาดสำหรับวันนี้</p>
+  <? } ?>
+
+  <h5 id="adjust-note">ตารางเวลานี้ใช้เฉพาะจังหวัดยะลา</h5>
+
+  <script>
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark");
+    }
+
+    function adjustTimeNote() {
+  const region = document.getElementById('region').value;
+  const note = document.getElementById('adjust-note');
+
+  const offsets = {
+    'ยะลา': 0,
+    'นครศรีธรรมราช': 3,
+    'จะนะ': 1,
+    'สตูล': 2,
+    'ตรัง': 4,
+    'ปัตตานี': -2,
+    'นราธิวาส': -4,
+    'สุไหงโกลก': -5
+  };
+
+  const messages = {
+    'ยะลา': 'ตารางเวลานี้ใช้เฉพาะจังหวัดยะลา',
+    'นครศรีธรรมราช': 'ระบบจะเพิ่ม 3 นาที ที่นครศรีฯ / พัทลุง',
+    'จะนะ': 'ระบบจะเพิ่ม 1 นาที ที่จะนะ / เทพา',
+    'สตูล': 'ระบบจะเพิ่ม 2 นาที ที่สตูล',
+    'ตรัง': 'ระบบจะเพิ่ม 4 นาที ที่ตรัง',
+    'ปัตตานี': 'ระบบจะลบ 2 นาที ที่ปัตตานี',
+    'นราธิวาส': 'ระบบจะลบ 4 นาที ที่นราธิวาส',
+    'สุไหงโกลก': 'ระบบจะลบ 5 นาที ที่สุไหงโกลก'
+  };
+
+  note.innerText = messages[region] || '';
+
+  const offset = offsets[region] || 0;
+
+  const prayerIds = ['subuh', 'syuruk', 'zuhur', 'asar', 'maghrib', 'isya'];
+
+  prayerIds.forEach(id => {
+    const timeSpan = document.querySelector(`#${id} .time`);
+    if (timeSpan) {
+      const original = timeSpan.getAttribute('data-original');
+      const baseTime = original || timeSpan.innerText;
+      const adjusted = adjustTimeByMinutes(baseTime, offset);
+      timeSpan.innerText = adjusted;
+
+      // เก็บค่าเวลาเดิมไว้ถ้ายังไม่มี
+      if (!original) {
+        timeSpan.setAttribute('data-original', baseTime);
+      }
+    }
+  });
+}
+
+// ฟังก์ชันบวก/ลบเวลา
+function adjustTimeByMinutes(timeStr, offset) {
+  const [h, m] = timeStr.split(':').map(Number);
+  let minutes = h * 60 + m + offset;
+
+  if (minutes < 0) minutes += 1440;
+  if (minutes >= 1440) minutes -= 1440;
+
+  const hh = String(Math.floor(minutes / 60)).padStart(2, '0');
+  const mm = String(minutes % 60).padStart(2, '0');
+  return `${hh}:${mm}`;
+}
+
+
+    function updateClock() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('th-TH', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      });
+      document.getElementById('clock').innerText = '⏰: ' + timeStr;
+    }
+
+    function highlightCurrentPrayer() {
+      const prayerTimes = {
+        subuh: "<?= times.subuh ?>",
+        syuruk: "<?= times.syuruk ?>",
+        zuhur: "<?= times.zuhur ?>",
+        asar: "<?= times.asar ?>",
+        maghrib: "<?= times.maghrib ?>",
+        isya: "<?= times.isya ?>"
+      };
+
+      const now = new Date();
+      const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+      function timeToMinutes(t) {
+        const [h, m] = t.split(':').map(Number);
+        return h * 60 + m;
+      }
+
+      let current = null;
+      const keys = Object.keys(prayerTimes);
+      for (let i = 0; i < keys.length; i++) {
+        const start = timeToMinutes(prayerTimes[keys[i]]);
+        const end = i < keys.length - 1 ? timeToMinutes(prayerTimes[keys[i + 1]]) : 1440;
+
+        if (nowMinutes >= start && nowMinutes < end) {
+          current = keys[i];
+          break;
+        }
+      }
+
+      keys.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove("active");
+      });
+
+      if (current) {
+        const activeEl = document.getElementById(current);
+        if (activeEl) activeEl.classList.add("active");
+      }
+    }
+
+    // เรียกใช้ฟังก์ชันเมื่อโหลดและทุกวินาที
+    updateClock();
+    highlightCurrentPrayer();
+    setInterval(() => {
+      updateClock();
+      highlightCurrentPrayer();
+    }, 1000);
+  </script>
+
+  <div class="footer">
+   copyright © 2025 : Credit by <a href="https://web.facebook.com/Bosszarul/" target="_blank" class="text-warning text-decoration-none">Bosszarul</a>
+  </div>
+
+</body>
+</html>
